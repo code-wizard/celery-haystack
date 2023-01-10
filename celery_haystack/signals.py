@@ -2,7 +2,6 @@ from django.db.models import signals
 
 from haystack.signals import BaseSignalProcessor
 from haystack.exceptions import NotHandled
-
 from .utils import enqueue_task
 from .indexes import CelerySearchIndex
 
@@ -30,7 +29,6 @@ class CelerySignalProcessor(BaseSignalProcessor):
         enqueue task.
         """
         using_backends = self.connection_router.for_write(instance=instance)
-
         for using in using_backends:
             try:
                 connection = self.connections[using]

@@ -23,7 +23,8 @@ def get_update_task(task_path=None):
     except AttributeError:
         raise ImproperlyConfigured('Module "%s" does not define a "%s" '
                                    'class.' % (module, attr))
-    return Task()
+    return Task
+    # return celery_haystack.tasks.test
 
 
 def enqueue_task(action, instance, **kwargs):
@@ -32,6 +33,9 @@ def enqueue_task(action, instance, **kwargs):
     model instance.
     """
     identifier = get_identifier(instance)
+    if instance.schema:
+        connection.set_schema(instance.schema)
+        kwargs['schema'] = instance.schema
     options = {}
     if settings.CELERY_HAYSTACK_QUEUE:
         options['queue'] = settings.CELERY_HAYSTACK_QUEUE
@@ -40,7 +44,6 @@ def enqueue_task(action, instance, **kwargs):
 
     task = get_update_task()
     task_func = lambda: task.apply_async((action, identifier), kwargs, **options)
-
     if hasattr(transaction, 'on_commit'):
         # Django 1.9 on_commit hook
         transaction.on_commit(
