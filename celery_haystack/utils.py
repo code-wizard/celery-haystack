@@ -33,9 +33,14 @@ def enqueue_task(action, instance, **kwargs):
     model instance.
     """
     identifier = get_identifier(instance)
-    if instance.schema:
-        connection.set_schema(instance.schema)
-        kwargs['schema'] = instance.schema
+    try:
+        if instance.schema:
+            connection.set_schema(instance.schema)
+            kwargs['schema'] = instance.schema
+    except AttributeError as e:
+        print("Celery Haystack utils.py: Ignoring schema")
+        pass
+        
     options = {}
     if settings.CELERY_HAYSTACK_QUEUE:
         options['queue'] = settings.CELERY_HAYSTACK_QUEUE
